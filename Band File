@@ -1,0 +1,232 @@
+#DSR cleaning file that combines statewide 2014 and 2015 dsr files into one file for growth calculation
+
+#clear work space
+rm(list = ls())
+
+#load packages
+x = c("dplyr", "tidyr")
+lapply(x, library, character.only = T)
+
+#set working directory
+setwd("//EDU-FileServer/HomeDirs/dduffy/My Documents/Data/State DSRs/Data Files")
+
+#define trim functions
+# returns string w/o leading whitespace
+trim.leading <- function (x)  sub("^\\s+", "", x)
+
+# returns string w/o trailing whitespace
+trim.trailing <- function (x) sub("\\s+$", "", x)
+
+# returns string w/o leading or trailing whitespace
+trim <- function (x) gsub("^\\s+|\\s+$", "", x)
+
+#create translation table for domains
+domain.codes <- data.frame(subject = c("C", "A", "W", "O", "R"),
+                           DOMAIN = c("COMPOSITE", "LISTENING", "WRITING", "SPEAKING", "READING"))
+
+
+#create translation table for proficiency levels 
+proficiency.key <- data.frame(Proficiency.Key = c("A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K"), 
+                             Proficiency = c(1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5, 5.5, 6))
+
+
+#Make a grade key. Note: Grades 9-12 are classified as HS because WIDA lumps those grades together for the growth
+#tables. 
+LYGradeKey <- data.frame(LYGradeKey = c("KG", "FIRST", "SECOND", "THIRD", "FOURTH", "FIFTH", "SIXTH", "SEVENTH", "EIGHTH", 
+                                         rep("HS",4)), 
+                         grade.level = c("KG", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"))
+
+#create a list of all files in the working directory
+file.list = as.list(list.files(pattern="*.txt"))
+
+#open and clean all files
+for(file in file.list){
+  pos <- match(file, file.list)
+  tempfile.name <- as.character(file.list[pos])
+
+  #read in the file
+  tempfile.raw <- read.table(file = tempfile.name, sep = "\t", quote = "\"", header = T
+                             , colClasses = c("marssNumber" = "character"
+                                              , "marssLocalUseData" = "character" 
+                                              ,"testDate" = "character"
+                                              , "districtNumber" = "character"
+                                              , "districtType" = "character"
+                                              , "schoolNumber" = "character"))
+  
+  #trim numbers for schools and districts
+  tempfile.raw$districtNumber<- trim(tempfile.raw$districtNumber)
+  tempfile.raw$districtType <- trim(tempfile.raw$districtType)
+  tempfile.raw$schoolNumber <- trim(tempfile.raw$schoolNumber)
+  
+  #format files
+  tempfile <- tempfile.raw %>%
+    select(marssNumber, marssLocalUseData, testDate, districtNumber, districtType, schoolNumber, scoreCode, grade, 
+           lepFlag, score1, score2, subject, admSince97) %>%
+    filter(scoreCode == "VS") %>%
+    mutate(score1 = score1/100, 
+           score2 = score2/100, 
+           SCHOOLID = paste(districtNumber, districtType, schoolNumber, sep = "")) %>%
+    mutate(YEAR = substr(testDate, 1, 4)) %>% 
+    rename(MARSSID = marssNumber, 
+           LOCALSTUDENTID = marssLocalUseData, 
+           GRADE = grade, 
+           SCORE1 = score1, 
+           SCORE2 = score2, 
+           ADM = admSince97) %>%
+    left_join(domain.codes, by = "subject") %>%
+    select(-c(subject, testDate, districtNumber, districtType, schoolNumber, scoreCode, lepFlag))
+  
+  #create file name
+  file.name <- paste(paste(unique(tempfile$DOMAIN), unique(tempfile$YEAR), sep = "_"), ".rds", sep = "")
+  
+  #set working directory for file 
+  sub.file <- paste(unique(tempfile$YEAR), "Files", sep = " ")
+  directory.name <- paste("//EDU-FileServer/HomeDirs/dduffy/My Documents/Data/State DSRs/", sub.file, sep = "")
+  
+  setwd(directory.name)
+  
+  saveRDS(tempfile, file.name)
+  
+  #reset working directory 
+  setwd("//EDU-FileServer/HomeDirs/dduffy/My Documents/Data/State DSRs/Data Files")
+  }
+
+#combine 2014 files 
+setwd("//EDU-FileServer/HomeDirs/dduffy/My Documents/Data/State DSRs/2014 Files")
+files.2014 <- as.list(list.files())
+
+DSR.14 <- data.frame(data.table::rbindlist(lapply(files.2014, readRDS)))
+
+#Remove duplicates
+DSR.14 <- DSR.14 %>%
+  arrange(MARSSID, DOMAIN) %>%
+  mutate(AnalysisID = paste(MARSSID, LOCALSTUDENTID, sep = "_"))
+
+ID.Remove <- DSR.14 %>%
+  group_by(AnalysisID) %>%
+  filter(n() > 5) %>%
+  select(AnalysisID)
+
+DSR.14 <- DSR.14[!(DSR.14$AnalysisID %in% ID.Remove$AnalysisID), ]
+
+DSR.14 <- select(DSR.14, -c(AnalysisID))
+
+setwd("//EDU-FileServer/HomeDirs/dduffy/My Documents/Data/State DSRs/State DSR")
+saveRDS(DSR.14, "2014 DSR.rds")
+
+
+#combine 2015 files
+setwd("//EDU-FileServer/HomeDirs/dduffy/My Documents/Data/State DSRs/2015 Files")
+files.2015 <- as.list(list.files())
+
+DSR.15 <- data.frame(data.table::rbindlist(lapply(files.2015, readRDS)))
+
+#Remove duplicates
+DSR.15 <- DSR.15 %>%
+  arrange(MARSSID, DOMAIN) %>%
+  mutate(AnalysisID = paste(MARSSID, LOCALSTUDENTID, sep = "_"))
+
+ID.Remove <- DSR.15 %>%
+  group_by(AnalysisID) %>%
+  filter(n() > 5) %>%
+  select(AnalysisID)
+
+DSR.15 <- DSR.15[!(DSR.15$AnalysisID %in% ID.Remove$AnalysisID), ]
+
+DSR.15 <- select(DSR.15, -c(AnalysisID))
+
+setwd("//EDU-FileServer/HomeDirs/dduffy/My Documents/Data/State DSRs/State DSR")
+saveRDS(DSR.15, "2015 DSR.rds")
+
+#Reformat DSRs to prepare them for growth loop
+data15 <- DSR.15 %>%
+  rename(CYScaleScore = SCORE1, 
+         CYGRADE = GRADE, 
+         CYProficiencyScore = SCORE2, 
+         CurrentYear = YEAR, 
+         SCHOOLID.15 = SCHOOLID, 
+         CYADM = ADM) %>%
+  mutate(AnalysisID = paste(MARSSID, LOCALSTUDENTID, sep = "_")) 
+  
+  
+data14 <- DSR.14 %>%
+  rename(LYScaleScore = SCORE1, 
+         LYGRADE = GRADE, 
+         LYProficiencyScore = SCORE2, 
+         PriorYear = YEAR, 
+         SCHOOLID.14 = SCHOOLID, 
+         LYADM = ADM) %>%
+  mutate(CYProficiencyLevel = plyr::round_any(LYProficiencyScore, .5, floor), 
+         AnalysisID = paste(MARSSID, LOCALSTUDENTID, sep = "_")) %>%
+  left_join(proficiency.key, by = c("CYProficiencyLevel" = "Proficiency")) %>% 
+  left_join(LYGradeKey, by = c("LYGRADE" = "grade.level")) %>%
+  select(-c(MARSSID, LOCALSTUDENTID))
+
+
+#Join the data frames together
+student.data <- data15 %>%
+  left_join(data14, by = c("AnalysisID", "DOMAIN")) %>%
+  mutate(scorediff = CYScaleScore - LYScaleScore)
+
+
+student.data$Range_Key = ifelse(is.na(student.data$LYGradeKey), NA, 
+                paste(student.data$LYGradeKey, student.data$DOMAIN, student.data$Proficiency.Key, student.data$CurrentYear, sep = "_"))
+
+
+#filter only to students who have a range key, create loop ID, and create Growth.Band variable
+student.data <- student.data %>%
+  filter(is.na(Range_Key) == F) %>%
+  mutate(loop.id = paste(AnalysisID, DOMAIN, sep = "_"), 
+         Growth.Band = "BAND")
+
+#read in growth table
+
+growth.table.15 <- read.csv("//EDU-FileServer/HomeDirs/dduffy/My Documents/Data/WIDA Percentile Data/GrowthCharts/2015/WIDA 2015 Master Growth Chart.csv", 
+                            header = T)
+
+
+#Create a Percentile_Key growth Rank 1-5 (5 for >80%, 1 for <20%). This will serve as a tie breaker (see 2015 Third Grade Speaking proficiency 6
+#for an example. A scale score growth of "0" will put a student anywhere between the 40th and 99th percentile. The method used in this file will 
+#give students the highest percentile growth band)
+Growth.Rank <- 1:5
+Percentile_Key <- unique(growth.table.15$Percentile_Key)
+tblGrowth.Rank <- data.frame(Growth.Rank, Percentile_Key)
+
+#Join this to the growth.table.15
+growth.table.15 <- growth.table.15 %>% left_join(tblGrowth.Rank, by = "Percentile_Key")
+
+
+#Create a list of IDs. 
+
+ID.list <- student.data$loop.id
+
+#Loop through each row and assign the growth band 
+for(ID in ID.list){
+  ID.position <- match(ID, ID.list)
+  table.name <- as.character(student.data$Growth_Key[ID.position])
+  person.score <- student.data$scorediff[ID.position]
+  table.use <- growth.table.15 %>% 
+    filter(Range_Key == table.name) %>% 
+    arrange(desc(Scale_Growth)) %>%
+    arrange(desc(Growth.Rank)) 
+  ranks <- table.use$Percentile_Key
+  count <- 1
+  
+  if(is.na(table.use$Scale_Growth[2])){
+    student.data$Growth.Band[ID.position] <- NA
+  }
+  else{
+    while (person.score < table.use$Scale_Growth[count]){
+      count <- count + 1
+    }
+    rank.use <- as.character(ranks[count])
+    student.data$Growth.Band[ID.position] <- rank.use 
+  }
+  print(paste(ID.position/length(ID.list)*100, "Percent Complete", sep = " "))
+}
+
+
+saveRDS(student.data, "State Growth Data 2015.rds")
+
+
+
