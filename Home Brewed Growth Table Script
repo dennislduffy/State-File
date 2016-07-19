@@ -217,9 +217,6 @@ quantile.labels <- c("<20%", ">20% & <40%", ">40% & <60%", ">60% & <80%", ">80%"
 quantile.names <- c(0, 20, 40, 60, 80)
 quantile.table <- data.frame(quantile.labels, quantile.names)
 
-GRADE.USE <- GRADES[5]
-DOMAIN.USE <- DOMAINS[1]
-CUT <- proficiency.cuts[1]
 
 #set new working directory for tables
 setwd("//EDU-FileServer/HomeDirs/dduffy/My Documents/Data/State DSRs/State DSR/2015 Growth Tables")
