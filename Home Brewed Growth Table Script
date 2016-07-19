@@ -1,7 +1,5 @@
 rm(list = ls())
 
-setwd("//EDU-FileServer/HomeDirs/dduffy/My Documents/Data/New State Growth Tables/2015 Growth Tables")
-
 x = c("dplyr", "tidyr")
 
 lapply(x, library, character.only = T)
