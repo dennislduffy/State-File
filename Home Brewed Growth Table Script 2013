@@ -115,17 +115,17 @@ DSR.12 <- DSR.12[!(DSR.12$AnalysisID %in% ID.Remove$AnalysisID), ]
 
 #Remove students with fewer than 5 scores
 DSR.12 <- DSR.12 %>%
-  arrange(MARSSID, DOMAIN) 
+  arrange(AnalysisID, DOMAIN) 
 
 ID.Remove <- DSR.12 %>%
-  group_by(MARSSID) %>%
+  group_by(AnalysisID) %>%
   filter(n() < 5) %>%
-  select(MARSSID)
+  select(AnalysisID)
 
-DSR.12 <- DSR.12[!(DSR.12$MARSSID %in% ID.Remove$MARSSID), ]
+DSR.12 <- DSR.12[!(DSR.12$AnalysisID %in% ID.Remove$AnalysisID), ]
 
 DSR.12 <- DSR.12 %>%
-  select(MARSSID, GRADE, SCORE1, SCORE2, DOMAIN) %>%
+  select(AnalysisID, GRADE, SCORE1, SCORE2, DOMAIN) %>%
   rename(LYGRADE = GRADE, 
          LYScaleScore = SCORE1, 
          LYProficiencyScore = SCORE2) %>%
@@ -164,14 +164,14 @@ DSR.13 <- DSR.13[!(DSR.13$AnalysisID %in% ID.Remove$AnalysisID), ]
 
 #Remove students with fewer than 5 scores
 DSR.13 <- DSR.13 %>%
-  arrange(MARSSID, DOMAIN) 
+  arrange(AnalysisID, DOMAIN) 
 
 ID.Remove <- DSR.13 %>%
-  group_by(MARSSID) %>%
+  group_by(AnalysisID) %>%
   filter(n() < 5) %>%
-  select(MARSSID)
+  select(AnalysisID)
 
-DSR.13 <- DSR.13[!(DSR.13$MARSSID %in% ID.Remove$MARSSID), ]
+DSR.13 <- DSR.13[!(DSR.13$AnalysisID %in% ID.Remove$AnalysisID), ]
 
 DSR.13 <- DSR.13 %>%
   rename(CYGRADE = GRADE, 
@@ -191,7 +191,7 @@ DSR.12 <- readRDS(file = "2012 DSR.rds")
 
 #join 2 years of DSR data
 student.data <- DSR.13 %>%
-  inner_join(DSR.12, by = c("MARSSID", "DOMAIN")) %>%
+  inner_join(DSR.12, by = c("AnalysisID", "DOMAIN")) %>%
   mutate(scorediff = CYScaleScore - LYScaleScore)
 
 
