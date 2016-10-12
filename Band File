@@ -81,7 +81,7 @@ for(file in file.list){
   
   #set working directory for file 
   sub.file <- paste(unique(tempfile$YEAR), "Files", sep = " ")
-  directory.name <- paste("//EDU-FileServer/HomeDirs/dduffy/My Documents/Data/State DSRs/", sub.file, sep = "")
+  directory.name <- paste("/Data/State DSRs/", sub.file, sep = "")
   
   setwd(directory.name)
   
