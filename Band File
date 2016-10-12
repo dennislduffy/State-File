@@ -8,7 +8,7 @@ x = c("dplyr", "tidyr")
 lapply(x, library, character.only = T)
 
 #set working directory
-setwd("//EDU-FileServer/HomeDirs/dduffy/My Documents/Data/State DSRs/Data Files")
+setwd("/Data/State DSRs/Data Files")
 
 #define trim functions
 # returns string w/o leading whitespace
@@ -88,11 +88,11 @@ for(file in file.list){
   saveRDS(tempfile, file.name)
   
   #reset working directory 
-  setwd("//EDU-FileServer/HomeDirs/dduffy/My Documents/Data/State DSRs/Data Files")
+  setwd("/Data/State DSRs/Data Files")
 }
 
 #combine 2014 files 
-setwd("//EDU-FileServer/HomeDirs/dduffy/My Documents/Data/State DSRs/2014 Files")
+setwd("/Data/State DSRs/2014 Files")
 files.2014 <- as.list(list.files())
 
 DSR.14 <- data.frame(data.table::rbindlist(lapply(files.2014, readRDS)))
@@ -119,12 +119,12 @@ DSR.14 <- DSR.14[!(DSR.14$AnalysisID %in% ID.Remove$AnalysisID), ]
 
 #DSR.14 <- select(DSR.14, -c(AnalysisID))
 
-setwd("//EDU-FileServer/HomeDirs/dduffy/My Documents/Data/State DSRs/State DSR")
+setwd("/Data/State DSRs/State DSR")
 saveRDS(DSR.14, "2014 DSR.rds")
 
 
 #combine 2015 files
-setwd("//EDU-FileServer/HomeDirs/dduffy/My Documents/Data/State DSRs/2015 Files")
+setwd("/Data/State DSRs/2015 Files")
 files.2015 <- as.list(list.files())
 
 DSR.15 <- data.frame(data.table::rbindlist(lapply(files.2015, readRDS)))
@@ -151,7 +151,7 @@ DSR.15 <- DSR.15[!(DSR.15$AnalysisID %in% ID.Remove$AnalysisID), ]
 
 #DSR.15 <- select(DSR.15, -c(AnalysisID))
 
-setwd("//EDU-FileServer/HomeDirs/dduffy/My Documents/Data/State DSRs/State DSR")
+setwd("/Data/State DSRs/State DSR")
 saveRDS(DSR.15, "2015 DSR.rds")
 
 #Reformat DSRs to prepare them for growth loop
@@ -196,7 +196,7 @@ student.data <- student.data %>%
 
 #read in growth table
 
-growth.table.15 <- readRDS("//EDU-FileServer/HomeDirs/dduffy/My Documents/Data/State DSRs/State DSR/MN Home Brewed Growth Tables/2015 Minnesota EL Growth with New ID.rds")
+growth.table.15 <- readRDS("/Data/State DSRs/State DSR/MN Home Brewed Growth Tables/2015 Minnesota EL Growth with New ID.rds")
 
 
 #Create a Percentile_Key growth Rank 1-5 (5 for >80%, 1 for <20%). This will serve as a tie breaker (see 2015 Third Grade Speaking proficiency 6
