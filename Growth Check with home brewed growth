@@ -1,6 +1,6 @@
 rm(list = ls())
 
-setwd("//EDU-FileServer/HomeDirs/dduffy/My Documents/Data/State DSRs")
+setwd("/Data/State DSRs")
 
 
 x = c("dplyr", "ggplot2", "scales", "ggthemes", "tidyr")
@@ -12,7 +12,7 @@ growth.scale.colors <- c("<20%" = "#5F9ED1", ">20% & <40%" = "#595959",
                          ">40% & <60%" = "#ABABAB", ">60% & <80%" = "#FF800E", 
                          ">80%" = "#006BA4")
 
-raw.data <- readRDS("//EDU-FileServer/HomeDirs/dduffy/My Documents/Data/State DSRs/State DSR/State Growth Data 2015 with MN growth table.rds")
+raw.data <- readRDS("/Data/State DSRs/State DSR/State Growth Data 2015 with MN growth table.rds")
 
 proficiency.data <- raw.data %>%
   mutate(LYLevel = plyr::round_any(LYProficiencyScore, 1, floor)) %>%
