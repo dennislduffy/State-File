@@ -5,7 +5,7 @@ x = c("dplyr", "tidyr")
 lapply(x, library, character.only = T)
 
 #set working directory
-setwd("//EDU-FileServer/HomeDirs/dduffy/My Documents/Data/State DSRs/Data Files")
+setwd("/Data/State DSRs/Data Files")
 
 #define trim functions
 # returns string w/o leading whitespace
@@ -78,18 +78,18 @@ for(file in file.list){
   
   #set working directory for file 
   sub.file <- paste(unique(tempfile$YEAR), "Files", sep = " ")
-  directory.name <- paste("//EDU-FileServer/HomeDirs/dduffy/My Documents/Data/State DSRs/", sub.file, sep = "")
+  directory.name <- paste("/Data/State DSRs/", sub.file, sep = "")
   
   setwd(directory.name)
   
   saveRDS(tempfile, file.name)
   
   #reset working directory 
-  setwd("//EDU-FileServer/HomeDirs/dduffy/My Documents/Data/State DSRs/Data Files")
+  setwd("/Data/State DSRs/Data Files")
 }
 
 #combine 2015 files 
-setwd("//EDU-FileServer/HomeDirs/dduffy/My Documents/Data/State DSRs/2015 Files")
+setwd("/Data/State DSRs/2015 Files")
 files.2015 <- as.list(list.files())
 
 DSR.15 <- data.frame(data.table::rbindlist(lapply(files.2015, readRDS)))
@@ -132,12 +132,12 @@ DSR.15 <- DSR.15 %>%
   mutate(LYProficiencyLevel = plyr::round_any(LYProficiencyScore, .5, floor))
 
 
-setwd("//EDU-FileServer/HomeDirs/dduffy/My Documents/Data/State DSRs/State DSR")
+setwd("/Data/State DSRs/State DSR")
 saveRDS(DSR.15, "2015 DSR.rds")
 
 
 #combine 2016 files 
-setwd("//EDU-FileServer/HomeDirs/dduffy/My Documents/Data/State DSRs/2016 Files")
+setwd("/Data/State DSRs/2016 Files")
 files.2016 <- as.list(list.files())
 
 DSR.16 <- data.frame(data.table::rbindlist(lapply(files.2016, readRDS)))
@@ -181,7 +181,7 @@ DSR.16 <- DSR.16 %>%
 #select(-c(MARSSID, LOCALSTUDENTID))
 
 
-setwd("//EDU-FileServer/HomeDirs/dduffy/My Documents/Data/State DSRs/State DSR")
+setwd("/Data/State DSRs/State DSR")
 saveRDS(DSR.16, "2016 DSR.rds")
 
 #Read in .rds from director
@@ -217,7 +217,7 @@ quantile.table <- data.frame(quantile.labels, quantile.names)
 
 
 #set new working directory for tables
-setwd("//EDU-FileServer/HomeDirs/dduffy/My Documents/Data/State DSRs/State DSR/2016 Growth Tables")
+setwd("/Data/State DSRs/State DSR/2016 Growth Tables")
 
 for (GRADE.USE in GRADES){
   
@@ -316,7 +316,7 @@ growth.table <- growth.table %>%
   arrange(Grade, DOMAIN, Proficiency_Key, Scale_Growth, desc(Percentile)) 
 
 #save file as .csv
-setwd("//EDU-FileServer/HomeDirs/dduffy/My Documents/Data/State DSRs/State DSR/MN Home Brewed Growth Tables")
+setwd("/Data/State DSRs/State DSR/MN Home Brewed Growth Tables")
 
 write.table(growth.table, "2016 Minnesota EL Growth With New ID.txt", sep = "\t", na = "", row.names = F)
 
